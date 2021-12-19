@@ -179,7 +179,7 @@ func checkOverlap(s1, s2 Scanner, rotations []RotationMatrix, requiredOverlaps i
 
 				if len(overlaps) >= requiredOverlaps {
 					//for _, overlap := range overlaps {
-					//	fmt.Printf("overlap relative to s1 %s (relative to s2 %s)\n", overlap.rotate(rm).add(offset).format(), overlap.format())
+					//	fmt.Printf("overlap relative to s1 %s (relative to s2 %s)\n", overlap.rotate(rm).sub(offset).format(), overlap.rotate(rm).format())
 					//}
 					fmt.Printf("found overlap %s\n", offset.format())
 					return true, offset, rm
@@ -212,10 +212,11 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 					continue
 				}
 
-				fmt.Printf("checking offset between %d and %d\n", originIndex, k)
+				//fmt.Printf("checking offset between %d and %d\n", originIndex, k)
 		
 				if overlap, offset, rm := checkOverlap(scanners[originIndex], scanners[k], rotations, 12); overlap {
 					totalOffset := originOffset.add(offset)
+
 					fmt.Printf("overlap between %d and %d with offset %s\n", originIndex, k, totalOffset.format())
 		
 					for _, beacon := range scanners[k].beacons {
