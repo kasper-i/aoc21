@@ -62,7 +62,7 @@ func cos(degree int) int {
 
 func makeRx(theta int) RotationMatrix {
 	return RotationMatrix{
-		m11: 1, m12: 0, m13: 0,
+		m11: 1, m12: 0,          m13: 0,
 		m21: 0, m22: cos(theta), m23: -sin(theta),
 		m31: 0, m32: sin(theta), m33: cos(theta),
 	}
@@ -70,8 +70,8 @@ func makeRx(theta int) RotationMatrix {
 
 func makeRy(theta int) RotationMatrix {
 	return RotationMatrix{
-		m11: cos(theta), m12: 0, m13: sin(theta),
-		m21: 0, m22: 1, m23: 0,
+		m11: cos(theta),  m12: 0, m13: sin(theta),
+		m21: 0,           m22: 1, m23: 0,
 		m31: -sin(theta), m32: 0, m33: cos(theta),
 	}
 }
@@ -79,8 +79,8 @@ func makeRy(theta int) RotationMatrix {
 func makeRz(theta int) RotationMatrix {
 	return RotationMatrix{
 		m11: cos(theta), m12: -sin(theta), m13: 0,
-		m21: sin(theta), m22: cos(theta), m23: 0,
-		m31: 0, m32: 0, m33: 1,
+		m21: sin(theta), m22: cos(theta),  m23: 0,
+		m31: 0,          m32: 0,           m33: 1,
 	}
 }
 
@@ -88,6 +88,22 @@ type Vector struct {
 	x int
 	y int
 	z int
+}
+
+func (v1 Vector) add(v2 Vector) Vector {
+	return Vector{
+		x: v1.x + v2.x,
+		y: v1.y + v2.y,
+		z: v1.z + v2.z,
+	}
+}
+
+func (v1 Vector) sub(v2 Vector) Vector {
+	return Vector{
+		x: v1.x - v2.x,
+		y: v1.y - v2.y,
+		z: v1.z - v2.z,
+	}
 }
 
 func makeVector(x, y, z int) Vector {
@@ -107,22 +123,21 @@ func (coord Vector) format() string {
 	return fmt.Sprintf("%d,%d,%d", coord.x, coord.y, coord.z)
 }
 
-func getOffset(src, dst Vector) Vector {
+func getOffset(origin, other Vector) Vector {
 	return Vector{
-		x: dst.x - src.x,
-		y: dst.y - src.y,
-		z: dst.z - src.z,
+		x: other.x - origin.x,
+		y: other.y - origin.y,
+		z: other.z - origin.z,
 	}
 }
 
-func withOffset(beacon, offset Vector) Vector {
+func subtractOffset(beacon, offset Vector) Vector {
 	return Vector{
-		x: beacon.x + offset.x,
-		y: beacon.y + offset.y,
-		z: beacon.z + offset.z,
+		x: beacon.x - offset.x,
+		y: beacon.y - offset.y,
+		z: beacon.z - offset.z,
 	}
 }
-
 
 func rotate(v Vector, rm RotationMatrix) Vector {
 	return Vector{
@@ -135,7 +150,7 @@ func rotate(v Vector, rm RotationMatrix) Vector {
 func checkOverlap(s1, s2 Scanner, rm RotationMatrix, requiredOverlaps int) (bool, Vector) {
 	for _, origin := range s1.beacons {
 		for k := 0; k < len(s2.beacons); k++ {
-			offset := getOffset(rotate(s2.beacons[k], rm), origin)
+			offset := getOffset(origin, rotate(s2.beacons[k], rm))
 			overlapCounter := 1
 
 			for j := 0; j < len(s2.beacons); j++ {
@@ -143,7 +158,7 @@ func checkOverlap(s1, s2 Scanner, rm RotationMatrix, requiredOverlaps int) (bool
 					continue
 				}
 
-				needle := withOffset(rotate(s2.beacons[j], rm), offset)
+				needle := subtractOffset(rotate(s2.beacons[j], rm), offset)
 
 				for _, s1Beacon := range s1.beacons {
 					if needle == s1Beacon {
@@ -163,9 +178,21 @@ func checkOverlap(s1, s2 Scanner, rm RotationMatrix, requiredOverlaps int) (bool
 }
 
 func part1(scanners []Scanner, rotations []RotationMatrix) {
+	var offset1 Vector
+
 	for _, rm := range rotations {
 		if overlap, offset := checkOverlap(scanners[0], scanners[1], rm, 12); overlap {
 			fmt.Printf("overlap with offset %s\n", offset.format())
+			offset1 = offset
+			break
+		}
+	}
+
+	for _, rm := range rotations {
+		if overlap, offset := checkOverlap(scanners[1], scanners[4], rm, 12); overlap {
+			fmt.Printf("overlap with offset %s\n", offset.format())
+			fmt.Printf("from sensor 0 %s\n", offset1.sub(offset).format())
+			break
 		}
 	}
 }
