@@ -156,10 +156,10 @@ func (v Vector) rotate(rm RotationMatrix) Vector {
 }
 
 func checkOverlap(s1, s2 Scanner, rotations []RotationMatrix, requiredOverlaps int) (bool, Vector, RotationMatrix) {
-	for _, rm := range rotations {
-		for _, origin := range s1.beacons {
-			for k := 0; k < len(s2.beacons); k++ {
-				offset := s2.beacons[k].rotate(rm).sub(origin)
+	for _, origin := range s1.beacons {
+		for k := 0; k < len(s2.beacons); k++ {
+			for _, rm := range rotations {
+				offset := origin.sub(s2.beacons[k].rotate(rm))
 				overlaps := []Vector{ s2.beacons[k] }
 
 				for j := 0; j < len(s2.beacons); j++ {
@@ -167,7 +167,7 @@ func checkOverlap(s1, s2 Scanner, rotations []RotationMatrix, requiredOverlaps i
 						continue
 					}
 
-					needle := s2.beacons[j].rotate(rm).sub(offset)
+					needle := s2.beacons[j].rotate(rm).add(offset)
 
 					for _, s1Beacon := range s1.beacons {
 						if needle == s1Beacon {
@@ -181,7 +181,7 @@ func checkOverlap(s1, s2 Scanner, rotations []RotationMatrix, requiredOverlaps i
 					//for _, overlap := range overlaps {
 					//	fmt.Printf("overlap relative to s1 %s (relative to s2 %s)\n", overlap.rotate(rm).sub(offset).format(), overlap.rotate(rm).format())
 					//}
-					fmt.Printf("found overlap %s\n", offset.format())
+					//fmt.Printf("found overlap %s\n", offset.format())
 					return true, offset, rm
 				}
 			}
@@ -219,10 +219,14 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 
 					fmt.Printf("overlap between %d and %d with offset %s\n", originIndex, k, totalOffset.format())
 		
-					for _, beacon := range scanners[k].beacons {
-						translatedBeacon := beacon.rotate(rm).sub(totalOffset)
-						if _, found := beacons[translatedBeacon]; !found {
-							beacons[translatedBeacon] = true
+					for i, beacon := range scanners[k].beacons {
+						rotatedBeacon := beacon.rotate(rm)
+						scanners[k].beacons[i].x = rotatedBeacon.x
+						scanners[k].beacons[i].y = rotatedBeacon.y
+						scanners[k].beacons[i].z = rotatedBeacon.z
+
+						if _, found := beacons[rotatedBeacon]; !found {
+							beacons[rotatedBeacon.add(offset)] = true
 							//fmt.Printf("added beacon %s\n", translatedBeacon.format())
 						}						
 					}
