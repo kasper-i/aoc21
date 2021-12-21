@@ -114,14 +114,6 @@ func (v1 Vector) invert() Vector {
 	}
 }
 
-//func makeVector(x, y, z int) Vector {
-//	return Vector{
-//		x: x,
-//		y: y,
-//		z: z,
-//	}
-//}
-
 type Scanner struct {
 	number  int
 	beacons []Vector
@@ -130,22 +122,6 @@ type Scanner struct {
 func (coord Vector) format() string {
 	return fmt.Sprintf("%d,%d,%d", coord.x, coord.y, coord.z)
 }
-
-//func getOffset(origin, other Vector) Vector {
-//	return Vector{
-//		x: other.x - origin.x,
-//		y: other.y - origin.y,
-//		z: other.z - origin.z,
-//	}
-//}
-
-//func subtractOffset(beacon, offset Vector) Vector {
-//	return Vector{
-//		x: beacon.x - offset.x,
-//		y: beacon.y - offset.y,
-//		z: beacon.z - offset.z,
-//	}
-//}
 
 func (v Vector) rotate(rm RotationMatrix) Vector {
 	return Vector{
@@ -178,10 +154,6 @@ func checkOverlap(s1, s2 Scanner, rotations []RotationMatrix, requiredOverlaps i
 				}
 
 				if len(overlaps) >= requiredOverlaps {
-					//for _, overlap := range overlaps {
-					//	fmt.Printf("overlap relative to s1 %s (relative to s2 %s)\n", overlap.rotate(rm).sub(offset).format(), overlap.rotate(rm).format())
-					//}
-					//fmt.Printf("found overlap %s\n", offset.format())
 					return true, offset, rm
 				}
 			}
@@ -200,7 +172,6 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 
 	for _, beacon := range scanners[0].beacons {
 		beacons[beacon] = true
-		//fmt.Printf("added beacon %s\n", beacon.format())
 	}
 	scannerOffsets[0] = Vector{}
 	allScannerOffsets[0] = Vector{}
@@ -214,8 +185,6 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 				if _, alreadyFound := overlapFound[k]; alreadyFound {
 					continue
 				}
-
-				//fmt.Printf("checking offset between %d and %d\n", originIndex, k)
 
 				if overlap, offset, rm := checkOverlap(scanners[originIndex], scanners[k], rotations, 12); overlap {
 					totalOffset := originOffset.add(offset)
@@ -232,7 +201,6 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 
 						if _, found := beacons[tmp]; !found {
 							beacons[tmp] = true
-							//fmt.Printf("added beacon %s\n", translatedBeacon.format())
 						}
 					}
 
@@ -304,22 +272,6 @@ func main() {
 
 	scanners = append(scanners, scanner)
 
-	//	for _, scanner := range scanners {
-	//		fmt.Printf("--- scanner %d ---\n", scanner.number)
-	//		for _, beacon := range scanner.beacons {
-	//			fmt.Printf("%d,%d,%d\n", beacon.x, beacon.y, beacon.z)
-	//		}
-	//		fmt.Println()
-	//	}
-	//
-	//	if overlap, offset := checkOverlap(scanners[0], scanners[1], 3); overlap {
-	//		fmt.Printf("found overlap with offset: %s\n", offset.format())
-	//	} else {
-	//		fmt.Println("no overlap")
-	//	}
-
-	//fmt.Println(rotate(makeVector(404,-588,-901), makeRx(90).multiply(makeRy(90)).multiply(makeRz(90))).format())
-
 	degrees := []int{0, 90, 180, 270}
 	var rotationSet map[RotationMatrix]bool = make(map[RotationMatrix]bool)
 	var rotations []RotationMatrix = make([]RotationMatrix, 0)
@@ -329,19 +281,13 @@ func main() {
 			for _, zRot := range degrees {
 				rm := makeRx(xRot).multiply(makeRy(yRot)).multiply(makeRz(zRot))
 				rotationSet[rm] = true
-				//rotations = append(rotations, rm)
 			}
 		}
 	}
 
-	//fmt.Println(len(rotations))
 	for rm := range rotationSet {
-		//	fmt.Println(rm.format())
-		//	fmt.Println()
 		rotations = append(rotations, rm)
 	}
-
-	//fmt.Println(len(rotations))
 
 	fmt.Println(part1(scanners, rotations))
 }
