@@ -196,11 +196,14 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 	var scannerOffsets map[int]Vector = make(map[int]Vector)
 	var overlapFound map[int]bool = make(map[int]bool)
 
+	var allScannerOffsets map[int]Vector = make(map[int]Vector)
+
 	for _, beacon := range scanners[0].beacons {
 		beacons[beacon] = true
 		//fmt.Printf("added beacon %s\n", beacon.format())
 	}
 	scannerOffsets[0] = Vector{}
+	allScannerOffsets[0] = Vector{}
 	overlapFound[0] = true
 
 	for len(scannerOffsets) > 0 {
@@ -234,6 +237,7 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 					}
 
 					nextScannerOffsets[k] = totalOffset
+					allScannerOffsets[k] = totalOffset
 					overlapFound[k] = true
 				}
 			}
@@ -242,15 +246,33 @@ func part1(scanners []Scanner, rotations []RotationMatrix) int {
 		scannerOffsets = nextScannerOffsets
 	}
 
-	//for beacon := range beacons {
-	//	fmt.Println(beacon.format())
-	//}
+	maxManhattanDistance := 0
+
+	for _, s1 := range allScannerOffsets {
+		for _, s2 := range allScannerOffsets {
+			distance := abs(s1.x-s2.x) + abs(s1.y-s2.y) + abs(s1.z-s2.z)
+
+			if distance > maxManhattanDistance {
+				maxManhattanDistance = distance
+			}
+		}
+	}
+
+	fmt.Println(maxManhattanDistance)
 
 	return len(beacons)
 }
 
+func abs(value int) int {
+	if value < 0 {
+		return (-1) * value
+	}
+
+	return value
+}
+
 func main() {
-	file, err := os.Open("small")
+	file, err := os.Open("input")
 	if err != nil {
 		log.Fatal(err)
 	}
